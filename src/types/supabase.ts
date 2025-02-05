@@ -52,19 +52,19 @@ export type Database = {
           content: Json | null
           created_at: string
           diary_id: string
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           content?: Json | null
           created_at?: string
           diary_id?: string
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           content?: Json | null
           created_at?: string
           diary_id?: string
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -163,15 +163,7 @@ export type Database = {
           nickname?: string
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "users_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
     }
     Views: {
@@ -269,4 +261,19 @@ export type Enums<
   ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
     ? PublicSchema["Enums"][PublicEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof PublicSchema["CompositeTypes"]
+    | { schema: keyof Database },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof PublicSchema["CompositeTypes"]
+    ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never

@@ -7,7 +7,7 @@
     "build": "TZ=Asia/Seoul next build",
     "start": "next start",
     "lint": "next lint",
-    "genTypes": "supabase gen types --lang=typescript --project-id hyirkcgdjbjlutppxsyx --schema public > src/types/supabase.ts"
+    "genTypes": "supabase gen types --lang=typescript --project-id hrxnbqgnwswndvzomsyz --schema public > src/types/supabase.ts"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.1",
