@@ -19,7 +19,7 @@ const DiaryDetailContent: React.FC<DiaryDetailContentPropsType> = ({ diaryConten
       images.forEach((img) => {
         img.style.borderRadius = "20px";
         img.style.border = "0px";
-        img.style.cursor = "none";
+        img.style.cursor = "default";
 
         const parent = img.parentElement;
         // if (parent) {  

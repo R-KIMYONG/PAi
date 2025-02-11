@@ -10,13 +10,13 @@ import "dayjs/locale/ko";
 import Todolist from "../../_components/Todolist";
 import detailStyle from "@/app/(main)/diary/_components/DiaryDetailPage.module.css";
 import DiaryDetailContent from "../../_components/DiaryDetailContent";
+import { useRouter } from "next/navigation";
 dayjs.locale("ko");
 
-async function getDiaryDetail(id: string, diaryIndex: number) {
+export async function getDiaryDetail(id: string, diaryIndex: number) {
   const supabase = createClient();
   try {
     const { data, error } = await supabase.from(DIARY_TABLE).select("*").eq("diary_id", id).single();
-
     if (error) {
       console.error("Error fetching diary detail:", error);
     }
@@ -72,8 +72,6 @@ const DiaryDetailPage = async ({ params, searchParams }: DiaryDetailPageProps) =
   const formatSelectedDate = (date: string) => {
     return dayjs(date).format("YYYY년 M월 D일");
   };
-  
-
   if (!diary) {
     return <div>상세내용 찾을 수 없습니다.</div>;
   }
@@ -94,8 +92,7 @@ const DiaryDetailPage = async ({ params, searchParams }: DiaryDetailPageProps) =
     diary_id: diary.diary_id,
     content: diary.content[diartIndex]
   };
-  const encodedPageData = encodeURIComponent(JSON.stringify(currentPageData));
-
+  const encodedPageData = encodeURIComponent(JSON.stringify(currentPageData.diary));
   return (
     <div className="flex flex-col justify-between bg-gray-100 desktop:h-screen mobile:h-[100dvh]">
       <DiaryWriteHeader headerText={formatSelectedDate(diary.created_at)} firstDiary={firstDiary} />
@@ -114,7 +111,7 @@ const DiaryDetailPage = async ({ params, searchParams }: DiaryDetailPageProps) =
         </div>
         <div className="flex justify-center gap-4 w-full h-20 items-center">
           <Link
-            href={`/diary/write-diary/${id}?data=${encodedPageData}`}
+            href={`/diary/write-diary/${id}?itemIndex=${diartIndex}`}
             className="w-[163px] h-10 bg-fai-500 text-center py-1.5 px-6 rounded-full houver:bg-fai-300 transition-all block"
           >
             <p className="text-h7 text-system-white">수정</p>

@@ -66,13 +66,23 @@ const DiaryContent: React.FC<DiaryContentProps> = ({ date }) => {
   const handleDropDownClick = (index: string) => {
     setOpenDropDownIndex(openDropDownIndex === index ? "-1" : index);
   };
-  const handleEditClick = (diaryId: string, diaryIndex: number) => {
+  const handleViewClick = (diaryId: string, diaryIndex: number) => {
     const queryParams: Record<string, string> = {
       itemIndex: diaryIndex.toString(),
       userId: userId!
     };
     const queryString = new URLSearchParams(queryParams).toString();
     router.push(`/diary/diary-detail/${diaryId}?${queryString}&from=diary-home`);
+    // router.push(`/diary/write-diary/${diaryId}?itemIndex=${diaryIndex}&from=diary-home`);
+  };
+  const handleEditClick = (diaryId: string, diaryIndex: number) => {
+    const queryParams: Record<string, string> = {
+      itemIndex: diaryIndex.toString(),
+      userId: userId!
+    };
+    const queryString = new URLSearchParams(queryParams).toString();
+    // router.push(`/diary/diary-detail/${diaryId}?${queryString}&from=diary-home`);
+    router.push(`/diary/write-diary/${diaryId}?itemIndex=${diaryIndex}&from=diary-home`);
   };
   const handleAddContentClick = () => {
     if (!loggedInUser) {
@@ -91,7 +101,6 @@ const DiaryContent: React.FC<DiaryContentProps> = ({ date }) => {
       router.push("/diary/write-diary");
     }
   };
-
 
   // const toggleIsFetchingMutation = useMutation({
   //   mutationFn: async ({
@@ -267,7 +276,7 @@ const DiaryContent: React.FC<DiaryContentProps> = ({ date }) => {
                   <li
                     key={`${diaryData.diary_id}-${itemIndex}`}
                     className={`bg-system-white border border-fai-500 w-[calc(100%-2rem)] mx-auto ${itemIndex === diaryData.content.length - 1 ? "mb-[5rem]" : ""} cursor-pointer ${isDesktop ? "rounded-[3.75rem] px-6 pt-6 pb-7" : "rounded-[2rem] py-3 px-5"}`}
-                    onClick={() => handleEditClick(diaryData.diary_id, itemIndex)}
+                    onClick={() => handleViewClick(diaryData.diary_id, itemIndex)}
                   >
                     <div className={`flex justify-between items-center ${isDesktop ? "" : "h-11"} w-full`}>
                       <div className="flex items-center gap-3 w-[85%]">
@@ -291,15 +300,13 @@ const DiaryContent: React.FC<DiaryContentProps> = ({ date }) => {
                           onClick={() => handleDropDownClick(`${diaryData.diary_id}-${itemIndex}`)}
                         />
                         <div
-                          className={`absolute top-4  w-36 h-20 rounded-xl overflow-x-hidden transform ${
-                            openDropDownIndex === `${diaryData.diary_id}-${itemIndex}`
-                              ? "right-16 shadow-lg"
-                              : "-right-36"
+                          className={`absolute top-4 -left-36  w-36 h-20 rounded-xl overflow-x-hidden transform ${
+                            openDropDownIndex === `${diaryData.diary_id}-${itemIndex}` ? "block shadow-lg" : "hidden"
                           } transition-transform duration-300`}
                         >
                           {/* {openDropDownIndex === `${diaryRow.diary_id}-${itemIndex}` && ( */}
                           <ul
-                            className={`absolute ${openDropDownIndex === `${diaryData.diary_id}-${itemIndex}` ? "right-0" : "right-[-120%]"} top-0 bg-system-white shadow-lg z-10  w-36 rounded-xl transition-all box-border`}
+                            className={`absolute ${openDropDownIndex === `${diaryData.diary_id}-${itemIndex}` ? "block" : "hidden"} top-0 bg-system-white shadow-lg z-10  w-36 rounded-xl transition-all box-border`}
                           >
                             <li
                               onClick={(e) => {

@@ -47,7 +47,6 @@ export type DiaryContentType = {
   content: string;
   diary_id: string;
   title: string;
-  isFetching_todo: boolean;
 };
 
 export type SaveDiaryEntryType = {
@@ -92,6 +91,6 @@ export type DiaryMapSearchMarkerType = {
 export type DiaryData = {
   diary_id: string;
   created_at: string;
-  content: { title: string; content: string; diary_id: string; isFetching_todo: boolean }[];
+  content: { title: string; content: string; diary_id: string }[];
   user_id: string;
 };
