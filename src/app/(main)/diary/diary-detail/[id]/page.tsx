@@ -13,7 +13,7 @@ import DiaryDetailContent from "../../_components/DiaryDetailContent";
 import { useRouter } from "next/navigation";
 dayjs.locale("ko");
 
-export async function getDiaryDetail(id: string, diaryIndex: number) {
+async function getDiaryDetail(id: string, diaryIndex: number) {
   const supabase = createClient();
   try {
     const { data, error } = await supabase.from(DIARY_TABLE).select("*").eq("diary_id", id).single();
