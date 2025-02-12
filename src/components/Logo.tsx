@@ -19,7 +19,7 @@ const Logo = ({ type, className, sizes }: LogoProps) => {
 
   return (
     <div className={`inline-block ${className}`}>
-      <div className="relative w-[2rem] h-[2rem] desktop:w-[63px] desktop:h-[48px]">
+      <div className="relative w-[2rem] h-[2rem] desktop:w-10 desktop:h-10">
         <Image
           src={imageSrc}
           fill
