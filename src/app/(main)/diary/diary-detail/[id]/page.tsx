@@ -10,7 +10,6 @@ import "dayjs/locale/ko";
 import Todolist from "../../_components/Todolist";
 import detailStyle from "@/app/(main)/diary/_components/DiaryDetailPage.module.css";
 import DiaryDetailContent from "../../_components/DiaryDetailContent";
-import { useRouter } from "next/navigation";
 dayjs.locale("ko");
 
 async function getDiaryDetail(id: string, diaryIndex: number) {

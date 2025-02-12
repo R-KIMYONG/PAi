@@ -1,6 +1,6 @@
 import Kakao from "@/components/icons/authIcons/Kakao";
 import { createClient } from "@/utils/supabase/client";
-import { SITE_URL, VERCEL_URL } from "./GoogleLoginBtn";
+import { VERCEL_URL } from "./GoogleLoginBtn";
 
 const KakaoLoginBtn = () => {
   const handleKakaoBtn = async () => {
@@ -9,8 +9,8 @@ const KakaoLoginBtn = () => {
       const { data: signInData, error: signInError } = await supabase.auth.signInWithOAuth({
         provider: "kakao",
         options: {
-          // redirectTo: `${VERCEL_URL}/api/auth/login/callback`
-          redirectTo: `${SITE_URL}/api/auth/login/callback`
+          redirectTo: `${VERCEL_URL}/api/auth/login/callback`
+          // redirectTo: `${SITE_URL}/api/auth/login/callback`
         }
       });
       if (signInError) {

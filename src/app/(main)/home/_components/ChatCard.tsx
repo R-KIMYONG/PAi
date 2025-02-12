@@ -67,7 +67,7 @@ const ChatCard = ({ aiType }: PropsType) => {
               className={`w-full desktop:mt-8 min-w-[7.75rem] relative flex rounded-full bg-system-white hover:cursor-pointer ${isFai ? "text-fai-500" : "text-pai-400"}`}
             >
               <div className="flex items-center desktop:px-5 desktop:py-3 min-w-[5.25rem] w-full h-auto mr-1 px-3 py-1">
-                <div className="flex items-center w-1/2 mr-[2px] h-[0.875rem] desktop:w-[12.5rem] desktop:h-[1.394rem] desktop:mr-2">
+                <div className="flex items-center w-[80%] mr-[2px] h-[0.875rem] desktop:w-[12.5rem] desktop:h-[1.394rem] desktop:mr-2">
                   <Logo type={logoType} />
                   <p className="desktop:text-sh3 desktop:ml-1.5 ml-1.5 text-c1">와 채팅</p>
                 </div>

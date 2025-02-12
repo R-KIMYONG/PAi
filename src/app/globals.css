@@ -487,7 +487,7 @@ button {
   animation: rotation 1s linear infinite;
   position: absolute;
   top: 45%;
-  left:50%;
+  left:46%;
   transform: translate(-55%,-50%);
 }
 

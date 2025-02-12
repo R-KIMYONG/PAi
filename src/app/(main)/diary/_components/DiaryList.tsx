@@ -40,7 +40,7 @@ const DiaryListPage: React.FC = () => {
     <>
       {/* <div className="flex flex-col bg-system-white box-border relative top-[4.5rem] h-[calc(100vh-72px)]"> */}
       <div
-        className={`bg-gray-100 box-border relative top-[5.375rem] ${isDesktop ? "h-[calc(100vh-5.375rem)] grid items-center gap-6 grid-rows-1 grid-cols-2" : "flex flex-col h-[calc(100dvh-5.375rem)]"}`}
+        className={`bg-gray-100 box-border relative top-[4.375rem] ${isDesktop ? "h-[calc(100vh-5.375rem)] grid items-center gap-6 grid-rows-1 grid-cols-2" : "flex flex-col h-[calc(100dvh-5.375rem)]"}`}
       >
         <Calendar
           selectedDate={new Date(selectedDate)}
