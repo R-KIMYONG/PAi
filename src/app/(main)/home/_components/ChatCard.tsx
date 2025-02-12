@@ -38,19 +38,19 @@ const ChatCard = ({ aiType }: PropsType) => {
             <div className="desktop:items-start desktop:gap-3 flex flex-col items-center">
               {isFai ? (
                 <>
-                  <p className="desktop:min-w-[14rem] desktop:text-left desktop:text-[1.625rem] desktop:leading-7 desktop:tracking-[0.8px] desktop:font-medium text-bc5 text-system-white">
+                  <p className="desktop:min-w-[14rem] desktop:text-left desktop:text-bc1 desktop:leading-7 desktop:tracking-[0.8px] desktop:font-medium text-bc5 text-system-white">
                     이야기를 듣고
                   </p>
-                  <p className="desktop:min-w-[14rem] desktop:text-left desktop:text-[1.625rem] desktop:leading-7 desktop:tracking-[0.8px] desktop:font-medium text-bc5 text-system-white">
+                  <p className="desktop:min-w-[14rem] desktop:text-left desktop:text-bc1 desktop:leading-7 desktop:tracking-[0.8px] desktop:font-medium text-bc5 text-system-white">
                     일기를 작성해드려요
                   </p>
                 </>
               ) : (
                 <>
-                  <p className="desktop:min-w-[14rem] desktop:text-left desktop:text-[1.625rem] desktop:leading-7 desktop:tracking-[0.8px] desktop:font-medium text-bc5 text-system-white">
+                  <p className="desktop:min-w-[14rem] desktop:text-left desktop:text-bc1 desktop:leading-7 desktop:tracking-[0.8px] desktop:font-medium text-bc5 text-system-white">
                     투두리스트를
                   </p>
-                  <p className="desktop:min-w-[14rem] desktop:text-left desktop:text-[1.625rem] desktop:leading-7 desktop:tracking-[0.8px] desktop:font-medium text-bc5 text-system-white">
+                  <p className="desktop:min-w-[14rem] desktop:text-left desktop:text-bc1 desktop:leading-7 desktop:tracking-[0.8px] desktop:font-medium text-bc5 text-system-white">
                     추천&작성해드려요
                   </p>
                 </>

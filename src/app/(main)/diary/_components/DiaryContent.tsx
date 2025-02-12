@@ -134,7 +134,7 @@ const DiaryContent: React.FC<DiaryContentProps> = ({ date }) => {
     const paragraphs = Array.from(tempElement.querySelectorAll("p")).slice(0, isDesktop ? MAX_LINES + 3 : MAX_LINES);
     return (
       <>
-        <ul className="flex justify-start gap-1 mobile:mt-2 desktop:mt-3.5">
+        <ul className="flex justify-start gap-[10px] mobile:mt-2 desktop:mt-3.5">
           {images.map((img, index) => (
             <li key={nanoid()} className="w-1/3">
               <Image
@@ -143,7 +143,7 @@ const DiaryContent: React.FC<DiaryContentProps> = ({ date }) => {
                 width={300}
                 height={300}
                 alt={`diary-image-${index}`}
-                className="w-full h-full my-2 rounded-[20px] block"
+                className="w-full h-auto my-2 rounded-xl block"
                 style={{ objectFit: "cover" }}
               />
             </li>
