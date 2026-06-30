@@ -1,6 +1,4 @@
 "use client";
-
-import useChatSession from "@/hooks/useChatSession";
 import { CHAT_SESSIONS } from "@/lib/constants/tableNames";
 import { AIType, Message, MessageWithButton } from "@/types/chat.session.type";
 import { createClient } from "@/utils/supabase/client";
@@ -323,7 +321,10 @@ const FriendChat = ({ sessionId, aiType }: FriendChatProps) => {
     setDiaryContent,
     setDiaryTitle,
     setShowSaveDiaryButton,
-    openModal
+    openModal,
+    diaryId,
+    diaryTitle,
+    router
   ]);
 
   const handleSendMessage = async () => {
