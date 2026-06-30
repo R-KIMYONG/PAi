@@ -7,20 +7,35 @@ import { createClient } from "@/utils/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 import { ChatCompletionMessageParam } from "openai/resources/index.mjs";
 import { nanoid } from "nanoid";
+import { AI_MODEL } from "@/lib/utils/chat/constants";
 
 // 제목 생성 함수
 async function generateDiaryTitle(content: string): Promise<string> {
   try {
     const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model: AI_MODEL,
       messages: [
-        { role: "system", content: "일기 내용을 바탕으로 창의적이고 간결한 제목을 만들어주세요." },
-        { role: "user", content: `다음 일기 내용에 대한 제목을 만들어주세요: ${content}` }
+        {
+          role: "system",
+          content:
+            "일기에 어울리는 제목을 딱 하나만, 설명·목록·마크다운·따옴표 없이 제목 텍스트만 15자 이내로 출력해줘."
+        },
+        { role: "user", content: `다음 일기 내용에 대한 제목을 만들어줘: ${content}` }
       ],
       max_tokens: 50
     });
 
-    return completion.choices[0].message.content?.trim() || "오늘의 일기";
+    // 모델이 마크다운/목록/접두어로 응답해도 안전하게 제목 하나만 추출
+    const raw = completion.choices[0].message.content ?? "";
+    const title = raw
+      .split("\n")[0] // 첫 줄만
+      .replace(/[*#`>_~]/g, "") // 마크다운 기호 제거
+      .replace(/^.*?[:：]\s*/, "") // "제목:" 류 접두 제거
+      .replace(/["'“”‘’「」]/g, "") // 따옴표 제거
+      .trim()
+      .slice(0, 30);
+
+    return title || "오늘의 일기";
   } catch (error) {
     console.error("일기 제목 생성 중 오류 발생:", error);
     return "오늘의 일기";
@@ -159,11 +174,13 @@ export const POST = async (request: NextRequest, { params }: { params: { id: str
     const systemMessage = isDiaryMode ? diarySystemMessage : generalSystemMessage;
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model: AI_MODEL,
       messages: [
+        // OpenAI 호환 레이어(Cerebras 등)는 마지막 system 메시지 하나만 system_instruction으로 인정하므로,
+        // 히스토리의 friend/system 메시지(웰컴 등)는 assistant로 강등해 아래 진짜 시스템 프롬프트가 버려지지 않게 한다.
         ...messages.map(
           (m): ChatCompletionMessageParam => ({
-            role: m.role === "friend" ? "assistant" : (m.role as "system" | "user" | "assistant"),
+            role: m.role === "friend" || m.role === "system" ? "assistant" : (m.role as "user" | "assistant"),
             content: m.content
           })
         ),
@@ -178,6 +195,9 @@ export const POST = async (request: NextRequest, { params }: { params: { id: str
     let aiResponse = completion.choices[0].message.content;
     aiResponse = aiResponse ? aiResponse.trim() : "";
 
+    // 일기 제목/내용은 응답 JSON에 별도 필드로 내려준다(클라가 메시지 문자열을 다시 파싱하지 않도록).
+    let diary: { title: string; content: string } | null = null;
+
     // "일기를 작성해줘" 메시지에 대한 응답
     if (message === "일기를 작성해줘") {
       aiResponse = "오늘 하루는 어땠어? 어떤 일들이 있었는지 얘기해줄래? 😊";
@@ -185,12 +205,18 @@ export const POST = async (request: NextRequest, { params }: { params: { id: str
     // 사용자가 하루에 대해 이야기한 후의 응답
     else if (messages[messages.length - 2]?.content === "오늘 하루는 어땠어? 어떤 일들이 있었는지 얘기해줄래? 😊") {
       // AI의 응답을 그대로 일기 내용으로 사용
-      let diaryContent = aiResponse.trim();
+      const diaryContent = aiResponse.trim();
 
-      // 일기 제목 생성
-      const diaryTitle = await generateDiaryTitle(diaryContent);
+      if (!diaryContent) {
+        // 모델이 빈 응답(과부하/오류 등)을 준 경우: 빈 일기를 만들지 않고 재시도 안내
+        aiResponse = "앗, 일기를 만드는 데 잠깐 문제가 생겼어. 오늘 있었던 일을 다시 한 번 얘기해줄래? 😅";
+      } else {
+        // 일기 제목 생성
+        const diaryTitle = await generateDiaryTitle(diaryContent);
 
-      aiResponse = `네가 얘기해준 내용을 바탕으로 일기를 작성해봤어. 제목은 ${diaryTitle}야. 어때, 맘에 들어? 😊\n\n${diaryContent}`;
+        diary = { title: diaryTitle, content: diaryContent };
+        aiResponse = `네가 얘기해준 내용을 바탕으로 일기를 작성해봤어. 제목은 ${diaryTitle}야. 어때, 맘에 들어? 😊\n\n${diaryContent}`;
+      }
     }
 
     const aiMessage: Message = {
@@ -217,7 +243,8 @@ export const POST = async (request: NextRequest, { params }: { params: { id: str
     const frontendAiMessage = { ...aiMessage, role: "friend" };
 
     return NextResponse.json({
-      message: [{ ...userMessage }, frontendAiMessage].filter(Boolean)
+      message: [{ ...userMessage }, frontendAiMessage].filter(Boolean),
+      diary
     });
   } catch (error) {
     console.error("Error:", error);
