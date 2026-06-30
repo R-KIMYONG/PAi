@@ -12,6 +12,7 @@ import {
   handleAddResponse
 } from "@/app/api/lib/chat";
 import { CHAT_SESSIONS } from "@/lib/constants/tableNames";
+import { AI_MODEL } from "@/lib/utils/chat/constants";
 import openai from "@/lib/utils/chat/openaiClient";
 import { getFormattedKoreaTime, getFormattedKoreaTimeWithOffset } from "@/lib/utils/getFormattedLocalTime";
 import { ApiResponse, ChatTodoItem, Message, MessageWithButton, RecommendItem } from "@/types/chat.session.type";
@@ -20,7 +21,7 @@ import { createClient } from "@/utils/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 import { ChatCompletionMessageParam } from "openai/resources/index.mjs";
 
-export const GET = async (request: NextRequest, { params }: { params: { id: string } }) => {
+export const GET = async (_: NextRequest, { params }: { params: { id: string } }) => {
   const supabase = createClient();
 
   const { id: sessionId } = params;
@@ -178,16 +179,18 @@ export const POST = async (request: NextRequest, { params }: { params: { id: str
     // console.log("combinedSystemMessage => ", combinedSystemMessage);
     // Open API 호출
     const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model: AI_MODEL,
       messages: [
         {
           role: "system",
           content: combinedSystemMessage
         },
         // 이전 메시지들을 포함하여 ai가 현재의 대화 흐름을 파악할 수 있도록 이해돕기
+        // OpenAI 호환 레이어(Cerebras 등)는 마지막 system 메시지 하나만 system_instruction으로 인정하므로,
+        // 히스토리에 섞인 system 메시지(웰컴 등)는 assistant로 강등해 위의 진짜 시스템 프롬프트가 버려지지 않게 한다.
         ...messages.map(
           (m): ChatCompletionMessageParam => ({
-            role: m.role as "system" | "user" | "assistant",
+            role: m.role === "system" ? "assistant" : (m.role as "user" | "assistant"),
             content: typeof m.content === "string" ? m.content : JSON.stringify(m.content)
           })
         ),

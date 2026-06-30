@@ -1,6 +1,4 @@
 "use client";
-
-import useChatSession from "@/hooks/useChatSession";
 import { CHAT_SESSIONS } from "@/lib/constants/tableNames";
 import { AIType, Message, MessageWithButton } from "@/types/chat.session.type";
 import { createClient } from "@/utils/supabase/client";
@@ -28,6 +26,13 @@ interface FriendChatProps {
 
 export type MutationContext = {
   previousMessages: MessageWithButton[] | undefined;
+};
+
+type DiaryPayload = { title: string; content: string };
+
+type SendMessageResult = {
+  message: MessageWithButton[];
+  diary: DiaryPayload | null;
 };
 
 const FriendChat = ({ sessionId, aiType }: FriendChatProps) => {
@@ -87,7 +92,7 @@ const FriendChat = ({ sessionId, aiType }: FriendChatProps) => {
     gcTime: 1000 * 60 * 30
   });
 
-  const sendMessageMutation = useMutation<MessageWithButton[], Error, string, MutationContext>({
+  const sendMessageMutation = useMutation<SendMessageResult, Error, string, MutationContext>({
     mutationFn: async (newMessage: string) => {
       const response = await fetch(`/api/chat/${aiType}/${sessionId}`, {
         method: "POST",
@@ -103,7 +108,7 @@ const FriendChat = ({ sessionId, aiType }: FriendChatProps) => {
 
       const data = await response.json();
       setIsNewConversation(true);
-      return data.message;
+      return { message: data.message, diary: data.diary ?? null };
     },
     onMutate: async (newMessage): Promise<MutationContext> => {
       await queryClient.cancelQueries({ queryKey: [queryKeys.chat, aiType, sessionId] });
@@ -133,24 +138,16 @@ const FriendChat = ({ sessionId, aiType }: FriendChatProps) => {
     onSuccess: (data, variables, context) => {
       queryClient.setQueryData<MessageWithButton[]>([queryKeys.chat, aiType, sessionId], (oldData = []) => {
         const withoutOptimisticUpdate = oldData.slice(0, -2);
-        const newMessages = [...withoutOptimisticUpdate, ...data];
+        const newMessages = [...withoutOptimisticUpdate, ...data.message];
 
         if (isDiaryMode) {
-          const lastAIMessage = data.find((msg) => msg.role === "friend");
-          if (lastAIMessage) {
-            if (lastAIMessage.content.includes("오늘 하루는 어땠어?")) {
-              setShowSaveDiaryButton(false);
-            } else if (lastAIMessage.content.includes("네가 얘기해준 내용을 바탕으로 일기를 작성해봤어")) {
-              // 제목과 내용 추출
-              const parts = lastAIMessage.content.split("\n\n");
-              const titlePart = parts[0].match(/제목은 "(.+)"야/);
-              const extractedTitle = titlePart ? titlePart[1] : "오늘의 일기";
-              const diaryContentOnly = parts[1];
-
-              setDiaryTitle(extractedTitle);
-              setDiaryContent(diaryContentOnly);
-              setShowSaveDiaryButton(true);
-            }
+          // 서버가 내려준 diary 필드를 그대로 사용(메시지 문자열 파싱 제거 → 다문단/형식 변화에도 내용 손실 없음).
+          if (data.diary) {
+            setDiaryTitle(data.diary.title);
+            setDiaryContent(data.diary.content);
+            setShowSaveDiaryButton(true);
+          } else {
+            setShowSaveDiaryButton(false);
           }
         }
 
@@ -288,8 +285,11 @@ const FriendChat = ({ sessionId, aiType }: FriendChatProps) => {
           // 한국 시간 기준으로 변경 필요
           const date = new Date().toISOString().split("T")[0];
 
-          // 날짜, 제목, 내용을 제외한 전체 일기 내용 생성
-          const fullDiaryContent = `<p>${diaryContent}</p>`;
+          // 다문단 내용을 보존: 빈 줄(\n\n) 기준으로 문단을 나눠 각각 <p>로 감싼다.
+          const fullDiaryContent = diaryContent
+            .split(/\n{2,}/)
+            .map((para) => `<p>${para.trim().replace(/\n/g, "<br>")}</p>`)
+            .join("");
 
           await saveDiaryEntry(date, diaryTitle, fullDiaryContent, diaryId, userEmail);
 
@@ -321,7 +321,10 @@ const FriendChat = ({ sessionId, aiType }: FriendChatProps) => {
     setDiaryContent,
     setDiaryTitle,
     setShowSaveDiaryButton,
-    openModal
+    openModal,
+    diaryId,
+    diaryTitle,
+    router
   ]);
 
   const handleSendMessage = async () => {

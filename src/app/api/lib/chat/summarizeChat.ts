@@ -1,3 +1,4 @@
+import { AI_MODEL } from "@/lib/utils/chat/constants";
 import openai from "@/lib/utils/chat/openaiClient";
 import { AIType, Message } from "@/types/chat.session.type";
 
@@ -39,7 +40,7 @@ export const summarizeChat = async (messages: Message[], aiType: AIType): Promis
       return null;
     }
     const response = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model: AI_MODEL,
       messages: [
         { role: "system", content: systemMessage },
         { role: "user", content: userMessage }
